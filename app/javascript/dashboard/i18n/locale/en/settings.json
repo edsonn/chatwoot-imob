@@ -1210,7 +1210,73 @@
       "NEXT_ACTION_LABEL": "Next Action",
       "NEXT_ACTION_PLACEHOLDER": "e.g., Send updated proposal",
       "NEXT_ACTION_AT_LABEL": "Next Action Date/Time",
-      "ERROR_GENERIC": "Unable to complete operation. Please try again."
+      "ERROR_GENERIC": "Unable to complete operation. Please try again.",
+      "LOST_BANNER_TITLE": "Deal Marked as Lost"
+    },
+    "FILTERS": {
+      "SEARCH_PLACEHOLDER": "Search by title, contact, phone, email...",
+      "ASSIGNEE": "Assignee",
+      "PRIORITY": "Priority",
+      "ALL_ASSIGNEES": "All assignees",
+      "MY_DEALS": "My deals",
+      "UNASSIGNED": "Unassigned",
+      "ALL_PRIORITIES": "All priorities",
+      "CLEAR": "Clear filters"
+    },
+    "DRAWER": {
+      "TITLE": "Deal Details",
+      "SYNCING": "Syncing...",
+      "OPEN_CONVERSATION": "Open Chat",
+      "TAB_OVERVIEW": "Overview",
+      "TAB_TASKS": "Tasks",
+      "TAB_HISTORY": "Timeline"
+    },
+    "STATUS": {
+      "OPEN": "Open",
+      "WON": "Won",
+      "LOST": "Lost"
+    },
+    "TASKS": {
+      "TITLE": "Tasks",
+      "ADD_TASK": "New Task",
+      "NEW_TASK_TITLE": "Create Task",
+      "TITLE_PLACEHOLDER": "Task description, e.g., Property visit",
+      "TYPE_LABEL": "Type",
+      "TYPE_VISIT": "Visit",
+      "TYPE_CALL": "Call",
+      "TYPE_CONTRACT": "Contract",
+      "TYPE_FOLLOW_UP": "Follow Up",
+      "DUE_DATE_LABEL": "Due Date",
+      "ASSIGNEE_LABEL": "Assignee",
+      "ASSIGN_TO_ME": "Assign to me",
+      "CANCEL": "Cancel",
+      "SAVE": "Save Task",
+      "PENDING": "Pending",
+      "NO_PENDING_TASKS": "No pending tasks",
+      "OVERDUE": "Overdue",
+      "COMPLETED": "Completed",
+      "COMPLETED_AT": "Completed on {date}",
+      "PENDING_COUNT": "{count} pending task(s)",
+      "CREATE_SUCCESS": "Task created successfully",
+      "COMPLETED_SUCCESS": "Task marked as completed",
+      "REOPENED_SUCCESS": "Task reopened",
+      "ERROR_GENERIC": "Unable to update task. Please try again."
+    },
+    "TIMELINE": {
+      "NO_ACTIVITIES": "No activities recorded yet",
+      "STAGE_CHANGED_FROM_TO": "Stage moved from {from} to {to}",
+      "STAGE_CHANGED_TO": "Stage moved to {to}",
+      "STAGE_CHANGED": "Stage updated",
+      "TASK_CREATED_WITH_TITLE": "Task created: {title}",
+      "TASK_CREATED": "Task created",
+      "TASK_COMPLETED_WITH_TITLE": "Task completed: {title}",
+      "TASK_COMPLETED": "Task completed",
+      "STATUS_CHANGED": "Status updated",
+      "ASSIGNMENT_CHANGED": "Assignee updated",
+      "VALUE_CHANGED": "Estimated value updated",
+      "NOTE_ADDED": "Note added",
+      "ACTIVITY_RECORDED": "Activity recorded",
+      "BY_USER": "by {user}"
     }
   }
 }

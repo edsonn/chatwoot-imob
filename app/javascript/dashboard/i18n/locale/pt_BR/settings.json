@@ -1173,7 +1173,73 @@
       "NEXT_ACTION_LABEL": "Próxima Ação",
       "NEXT_ACTION_PLACEHOLDER": "Ex.: Enviar proposta revisada",
       "NEXT_ACTION_AT_LABEL": "Data/Hora da Próxima Ação",
-      "ERROR_GENERIC": "Não foi possível concluir a operação. Tente novamente."
+      "ERROR_GENERIC": "Não foi possível concluir a operação. Tente novamente.",
+      "LOST_BANNER_TITLE": "Oportunidade Perdida"
+    },
+    "FILTERS": {
+      "SEARCH_PLACEHOLDER": "Buscar por título, contato, telefone, e-mail...",
+      "ASSIGNEE": "Responsável",
+      "PRIORITY": "Prioridade",
+      "ALL_ASSIGNEES": "Todos os responsáveis",
+      "MY_DEALS": "Meus negócios",
+      "UNASSIGNED": "Sem responsável",
+      "ALL_PRIORITIES": "Todas as prioridades",
+      "CLEAR": "Limpar filtros"
+    },
+    "DRAWER": {
+      "TITLE": "Detalhes da Oportunidade",
+      "SYNCING": "Sincronizando...",
+      "OPEN_CONVERSATION": "Abrir conversa",
+      "TAB_OVERVIEW": "Visão Geral",
+      "TAB_TASKS": "Tarefas",
+      "TAB_HISTORY": "Histórico"
+    },
+    "STATUS": {
+      "OPEN": "Aberta",
+      "WON": "Ganha",
+      "LOST": "Perdida"
+    },
+    "TASKS": {
+      "TITLE": "Tarefas",
+      "ADD_TASK": "Nova Tarefa",
+      "NEW_TASK_TITLE": "Criar Tarefa",
+      "TITLE_PLACEHOLDER": "Ex.: Visita ao imóvel com cliente",
+      "TYPE_LABEL": "Tipo",
+      "TYPE_VISIT": "Visita",
+      "TYPE_CALL": "Ligação",
+      "TYPE_CONTRACT": "Contrato",
+      "TYPE_FOLLOW_UP": "Acompanhamento",
+      "DUE_DATE_LABEL": "Prazo",
+      "ASSIGNEE_LABEL": "Responsável",
+      "ASSIGN_TO_ME": "Atribuir a mim",
+      "CANCEL": "Cancelar",
+      "SAVE": "Salvar Tarefa",
+      "PENDING": "Pendentes",
+      "NO_PENDING_TASKS": "Nenhuma tarefa pendente",
+      "OVERDUE": "Atrasada",
+      "COMPLETED": "Concluídas",
+      "COMPLETED_AT": "Concluída em {date}",
+      "PENDING_COUNT": "{count} tarefa(s) pendente(s)",
+      "CREATE_SUCCESS": "Tarefa criada com sucesso",
+      "COMPLETED_SUCCESS": "Tarefa concluída",
+      "REOPENED_SUCCESS": "Tarefa reaberta",
+      "ERROR_GENERIC": "Não foi possível atualizar a tarefa. Tente novamente."
+    },
+    "TIMELINE": {
+      "NO_ACTIVITIES": "Nenhuma atividade registrada até o momento",
+      "STAGE_CHANGED_FROM_TO": "Etapa alterada de {from} para {to}",
+      "STAGE_CHANGED_TO": "Etapa alterada para {to}",
+      "STAGE_CHANGED": "Etapa alterada",
+      "TASK_CREATED_WITH_TITLE": "Tarefa criada: {title}",
+      "TASK_CREATED": "Tarefa criada",
+      "TASK_COMPLETED_WITH_TITLE": "Tarefa concluída: {title}",
+      "TASK_COMPLETED": "Tarefa concluída",
+      "STATUS_CHANGED": "Status alterado",
+      "ASSIGNMENT_CHANGED": "Responsável alterado",
+      "VALUE_CHANGED": "Valor estimado alterado",
+      "NOTE_ADDED": "Anotação adicionada",
+      "ACTIVITY_RECORDED": "Atividade registrada",
+      "BY_USER": "por {user}"
     }
   }
 }

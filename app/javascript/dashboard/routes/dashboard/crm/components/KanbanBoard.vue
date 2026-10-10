@@ -16,7 +16,13 @@ defineProps({
   },
 });
 
-const emit = defineEmits(['edit-deal', 'move-deal', 'won-deal', 'lost-deal']);
+const emit = defineEmits([
+  'edit-deal',
+  'move-deal',
+  'won-deal',
+  'lost-deal',
+  'select-deal',
+]);
 </script>
 
 <template>
@@ -32,6 +38,7 @@ const emit = defineEmits(['edit-deal', 'move-deal', 'won-deal', 'lost-deal']);
         @move-deal="d => emit('move-deal', d)"
         @won-deal="d => emit('won-deal', d)"
         @lost-deal="d => emit('lost-deal', d)"
+        @select-deal="d => emit('select-deal', d)"
       />
     </div>
   </div>

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 import { useCrmStore } from 'dashboard/stores/crm';
 import { useAlert } from 'dashboard/composables';
 import { parseAPIErrorResponse } from 'dashboard/store/utils/api';
@@ -9,25 +10,35 @@ import Select from 'dashboard/components-next/select/Select.vue';
 import EmptyStateLayout from 'dashboard/components-next/EmptyStateLayout.vue';
 import KanbanBoard from '../components/KanbanBoard.vue';
 import KanbanSkeleton from '../components/KanbanSkeleton.vue';
+import KanbanFiltersBar from '../components/KanbanFiltersBar.vue';
 import DealFormDialog from '../components/DealFormDialog.vue';
 import MoveDealDialog from '../components/MoveDealDialog.vue';
 import WonDealDialog from '../components/WonDealDialog.vue';
 import LostDealDialog from '../components/LostDealDialog.vue';
+import DealDetailsDrawer from '../components/DealDetailsDrawer.vue';
 
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 const crmStore = useCrmStore();
 
 const dealFormDialogRef = ref(null);
 const moveDealDialogRef = ref(null);
 const wonDealDialogRef = ref(null);
 const lostDealDialogRef = ref(null);
+const dealDetailsDrawerRef = ref(null);
 
 const pipelines = computed(() => crmStore.getPipelines);
 const activePipeline = computed(() => crmStore.getActivePipeline);
 const stages = computed(() => crmStore.getStages);
 const dealsByStage = computed(() => crmStore.getDealsByStage);
 const stageMetrics = computed(() => crmStore.getStageMetrics);
+const allDeals = computed(() => crmStore.getDeals);
 const uiFlags = computed(() => crmStore.getUIFlags);
+
+const searchQuery = computed(() => crmStore.getSearchQuery);
+const assigneeFilter = computed(() => crmStore.getSelectedAssignee);
+const priorityFilter = computed(() => crmStore.getSelectedPriority);
 
 const isFetchingPipelines = computed(() => uiFlags.value.fetchingPipelines);
 const isFetchingDeals = computed(() => uiFlags.value.fetchingDeals);
@@ -48,6 +59,20 @@ watch(
   newId => {
     selectedPipelineId.value = newId;
   }
+);
+
+// Ao carregar os deals, se houver deal_id na query da URL, abre o drawer correspondente
+watch(
+  () => [allDeals.value, route.query.deal_id],
+  ([deals, dealIdParam]) => {
+    if (dealIdParam && deals && deals.length > 0) {
+      const targetDeal = deals.find(d => String(d.id) === String(dealIdParam));
+      if (targetDeal && !crmStore.getActiveDealDetails) {
+        dealDetailsDrawerRef.value?.open(targetDeal);
+      }
+    }
+  },
+  { immediate: true }
 );
 
 const pipelineOptions = computed(() =>
@@ -109,6 +134,34 @@ const handleOpenLostDeal = deal => {
   lostDealDialogRef.value?.open(deal);
 };
 
+const handleOpenDealDetails = deal => {
+  dealDetailsDrawerRef.value?.open(deal);
+  const query = { ...route.query, deal_id: String(deal.id) };
+  router.replace({ query });
+};
+
+const handleCloseDealDetails = () => {
+  const query = { ...route.query };
+  delete query.deal_id;
+  router.replace({ query });
+};
+
+const handleUpdateFilters = ({ q, assignee_id, priority }) => {
+  crmStore.setFilters({ q, assignee_id, priority });
+
+  const query = { ...route.query };
+  if (q) query.q = q;
+  else delete query.q;
+
+  if (assignee_id) query.assignee_id = assignee_id;
+  else delete query.assignee_id;
+
+  if (priority) query.priority = priority;
+  else delete query.priority;
+
+  router.replace({ query });
+};
+
 const handleCreateDeal = async payload => {
   try {
     await crmStore.createDeal(payload);
@@ -168,7 +221,39 @@ const handleConfirmLost = async ({
   }
 };
 
+const handleCreateTask = async ({ dealId, payload }) => {
+  try {
+    await crmStore.createTask(dealId, payload);
+    useAlert(t('CRM.TASKS.CREATE_SUCCESS'));
+  } catch (error) {
+    useAlert(parseAPIErrorResponse(error) || t('CRM.TASKS.ERROR_GENERIC'));
+  }
+};
+
+const handleToggleTask = async ({ dealId, taskId, completed }) => {
+  try {
+    await crmStore.updateTask(dealId, taskId, {
+      completed_at: completed ? new Date().toISOString() : null,
+    });
+    useAlert(
+      completed
+        ? t('CRM.TASKS.COMPLETED_SUCCESS')
+        : t('CRM.TASKS.REOPENED_SUCCESS')
+    );
+  } catch (error) {
+    useAlert(parseAPIErrorResponse(error) || t('CRM.TASKS.ERROR_GENERIC'));
+  }
+};
+
 onMounted(() => {
+  // Hidrata filtros a partir da query string da rota
+  const { q, assignee_id, priority } = route.query;
+  crmStore.setFilters({
+    q: q ? String(q) : '',
+    assignee_id: assignee_id ? String(assignee_id) : '',
+    priority: priority ? String(priority) : '',
+  });
+
   crmStore.fetchPipelines();
 });
 </script>
@@ -228,6 +313,15 @@ onMounted(() => {
 
     <!-- Main Content -->
     <main class="flex-1 w-full overflow-hidden p-6 flex flex-col">
+      <!-- Filters and Search Bar (Active when board is ready) -->
+      <KanbanFiltersBar
+        v-if="!hasError && pipelines.length > 0 && !isFetching"
+        :search-query="searchQuery"
+        :assignee-filter="assigneeFilter"
+        :priority-filter="priorityFilter"
+        @update:filters="handleUpdateFilters"
+      />
+
       <!-- Loading State -->
       <template v-if="isFetching && stages.length === 0">
         <KanbanSkeleton />
@@ -278,6 +372,7 @@ onMounted(() => {
           @move-deal="handleOpenMoveDeal"
           @won-deal="handleOpenWonDeal"
           @lost-deal="handleOpenLostDeal"
+          @select-deal="handleOpenDealDetails"
         />
       </template>
     </main>
@@ -306,6 +401,14 @@ onMounted(() => {
       ref="lostDealDialogRef"
       :is-loading="uiFlags.losingDeal"
       @confirm="handleConfirmLost"
+    />
+
+    <!-- Deal Details Drawer -->
+    <DealDetailsDrawer
+      ref="dealDetailsDrawerRef"
+      @close="handleCloseDealDetails"
+      @create-task="handleCreateTask"
+      @toggle-task="handleToggleTask"
     />
   </div>
 </template>

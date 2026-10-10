@@ -14,7 +14,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['edit', 'move', 'won', 'lost']);
+const emit = defineEmits(['edit', 'move', 'won', 'lost', 'select']);
 
 const { t } = useI18n();
 const store = useStore();
@@ -28,6 +28,11 @@ const canOperate = computed(() => {
   if (isAdmin.value) return true;
   const assigneeId = props.deal.assignee?.id;
   return !assigneeId || assigneeId === currentUserId.value;
+});
+
+const pendingTasksCount = computed(() => {
+  if (!props.deal.tasks) return 0;
+  return props.deal.tasks.filter(t => !t.completed_at).length;
 });
 
 const menuItems = computed(() => [
@@ -56,6 +61,10 @@ const menuItems = computed(() => [
 const handleMenuAction = ({ action }) => {
   showMenu.value = false;
   emit(action, props.deal);
+};
+
+const handleCardClick = () => {
+  emit('select', props.deal);
 };
 
 const formattedValue = computed(() => {
@@ -96,9 +105,10 @@ const priorityConfig = computed(() => {
 
 <template>
   <div
-    class="group relative flex flex-col gap-2.5 rounded-xl border border-n-weak bg-n-solid-1 p-3.5 shadow-sm transition-all duration-150 hover:border-n-slate-6 hover:shadow dark:bg-n-solid-2 cursor-default select-none"
+    class="group relative flex flex-col gap-2.5 rounded-xl border border-n-weak bg-n-solid-1 p-3.5 shadow-sm transition-all duration-150 hover:border-n-slate-7 hover:shadow-md dark:bg-n-solid-2 cursor-pointer select-none"
+    @click="handleCardClick"
   >
-    <!-- Card Header: Title, Priority & Actions Menu -->
+    <!-- Card Header: Title, Priority, Tasks Badge & Actions Menu -->
     <div class="flex items-start justify-between gap-2">
       <div class="flex flex-col gap-1 min-w-0 flex-1">
         <h4
@@ -115,6 +125,16 @@ const priorityConfig = computed(() => {
           >
             {{ priorityConfig.label }}
           </span>
+
+          <!-- Pending Tasks Badge -->
+          <span
+            v-if="pendingTasksCount > 0"
+            class="shrink-0 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium bg-n-blue-2 text-n-blue-11 outline outline-1 -outline-offset-1 outline-n-blue-4"
+            :title="t('CRM.TASKS.PENDING_COUNT', { count: pendingTasksCount })"
+          >
+            <span class="i-lucide-check-square size-3" />
+            <span>{{ pendingTasksCount }}</span>
+          </span>
         </div>
       </div>
 
@@ -123,6 +143,7 @@ const priorityConfig = computed(() => {
         v-if="canOperate"
         v-on-clickaway="() => (showMenu = false)"
         class="relative shrink-0"
+        @click.stop
       >
         <Button
           variant="ghost"
@@ -132,7 +153,7 @@ const priorityConfig = computed(() => {
           class="opacity-0 group-hover:opacity-100 transition-opacity"
           :class="{ '!opacity-100': showMenu }"
           :aria-label="t('CRM.ACTIONS.MENU_LABEL')"
-          @click="showMenu = !showMenu"
+          @click.stop="showMenu = !showMenu"
         />
 
         <DropdownMenu

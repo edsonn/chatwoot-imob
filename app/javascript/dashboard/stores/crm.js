@@ -4,11 +4,14 @@ import { createStore } from 'dashboard/store/storeFactory';
 const createInitialUIFlags = () => ({
   fetchingPipelines: false,
   fetchingDeals: false,
+  fetchingDealDetails: false,
   creatingDeal: false,
   updatingDeal: false,
   movingDeal: false,
   winningDeal: false,
   losingDeal: false,
+  creatingTask: false,
+  updatingTask: false,
   fetchingLossReasons: false,
   error: null,
   errorCode: null,
@@ -24,6 +27,10 @@ export const useCrmStore = createStore({
     activePipelineId: null,
     deals: [],
     lossReasons: [],
+    activeDealDetails: null,
+    searchQuery: '',
+    selectedAssignee: '',
+    selectedPriority: '',
     uiFlags: createInitialUIFlags(),
   }),
 
@@ -63,7 +70,46 @@ export const useCrmStore = createStore({
     getDeals: state =>
       (state.deals || []).slice().sort((a, b) => a.position - b.position),
 
-    getDealsByStage: state => {
+    getSearchQuery: state => state.searchQuery,
+    getSelectedAssignee: state => state.selectedAssignee,
+    getSelectedPriority: state => state.selectedPriority,
+
+    getFilteredDeals: state => {
+      let result = (state.deals || []).slice().sort((a, b) => a.position - b.position);
+
+      const query = (state.searchQuery || '').trim().toLowerCase();
+      if (query) {
+        result = result.filter(deal => {
+          const title = (deal.title || '').toLowerCase();
+          const contactName = (deal.contact?.name || '').toLowerCase();
+          const contactPhone = (deal.contact?.phone_number || '').toLowerCase();
+          const contactEmail = (deal.contact?.email || '').toLowerCase();
+          return (
+            title.includes(query) ||
+            contactName.includes(query) ||
+            contactPhone.includes(query) ||
+            contactEmail.includes(query)
+          );
+        });
+      }
+
+      if (state.selectedAssignee) {
+        if (state.selectedAssignee === 'unassigned') {
+          result = result.filter(deal => !deal.assignee?.id);
+        } else if (state.selectedAssignee !== 'all') {
+          const assigneeId = Number(state.selectedAssignee);
+          result = result.filter(deal => deal.assignee?.id === assigneeId);
+        }
+      }
+
+      if (state.selectedPriority && state.selectedPriority !== 'all') {
+        result = result.filter(deal => deal.priority === state.selectedPriority);
+      }
+
+      return result;
+    },
+
+    getDealsByStage: (state, getters) => {
       const grouped = {};
       const pipeline =
         state.pipelines.find(p => p.id === Number(state.activePipelineId)) ||
@@ -74,7 +120,8 @@ export const useCrmStore = createStore({
         grouped[stage.id] = [];
       });
 
-      (state.deals || []).forEach(deal => {
+      const dealsToGroup = getters.getFilteredDeals || [];
+      dealsToGroup.forEach(deal => {
         const stageId = deal.crm_pipeline_stage_id;
         if (grouped[stageId]) {
           grouped[stageId].push(deal);
@@ -90,7 +137,7 @@ export const useCrmStore = createStore({
       return grouped;
     },
 
-    getStageMetrics: state => {
+    getStageMetrics: (state, getters) => {
       const metrics = {};
       const pipeline =
         state.pipelines.find(p => p.id === Number(state.activePipelineId)) ||
@@ -101,7 +148,8 @@ export const useCrmStore = createStore({
         metrics[stage.id] = { count: 0, totalValue: 0, currency: 'BRL' };
       });
 
-      (state.deals || []).forEach(deal => {
+      const dealsToCount = getters.getFilteredDeals || [];
+      dealsToCount.forEach(deal => {
         const stageId = deal.crm_pipeline_stage_id;
         if (!metrics[stageId]) {
           metrics[stageId] = { count: 0, totalValue: 0, currency: 'BRL' };
@@ -115,6 +163,8 @@ export const useCrmStore = createStore({
 
       return metrics;
     },
+
+    getActiveDealDetails: state => state.activeDealDetails,
 
     getLossReasons: state => state.lossReasons,
 
@@ -327,6 +377,75 @@ export const useCrmStore = createStore({
         return lostDeal;
       } finally {
         this.setUIFlag({ losingDeal: false });
+      }
+    },
+
+    setFilters({ q, assignee_id, priority }) {
+      if (q !== undefined) this.searchQuery = q;
+      if (assignee_id !== undefined) this.selectedAssignee = assignee_id;
+      if (priority !== undefined) this.selectedPriority = priority;
+    },
+
+    setActiveDealDetails(deal) {
+      this.activeDealDetails = deal ? { ...deal } : null;
+    },
+
+    clearActiveDealDetails() {
+      this.activeDealDetails = null;
+    },
+
+    async fetchDealDetails(id) {
+      if (!id) return null;
+      this.setUIFlag({ fetchingDealDetails: true });
+      try {
+        const response = await CrmAPI.getDeal(id);
+        const detailedDeal = response.data?.payload || response.data;
+        if (detailedDeal && detailedDeal.id) {
+          this.activeDealDetails = detailedDeal;
+          const index = this.deals.findIndex(d => d.id === detailedDeal.id);
+          if (index !== -1) {
+            this.deals[index] = detailedDeal;
+          }
+        }
+        return detailedDeal;
+      } finally {
+        this.setUIFlag({ fetchingDealDetails: false });
+      }
+    },
+
+    async createTask(dealId, payload) {
+      this.setUIFlag({ creatingTask: true });
+      try {
+        const response = await CrmAPI.createTask(dealId, payload);
+        const createdTask = response.data?.payload || response.data;
+        if (this.activeDealDetails && this.activeDealDetails.id === Number(dealId)) {
+          const currentTasks = this.activeDealDetails.tasks || [];
+          this.activeDealDetails.tasks = [...currentTasks, createdTask];
+        }
+        this.fetchDealDetails(dealId).catch(() => {});
+        return createdTask;
+      } finally {
+        this.setUIFlag({ creatingTask: false });
+      }
+    },
+
+    async updateTask(dealId, taskId, payload) {
+      this.setUIFlag({ updatingTask: true });
+      try {
+        const response = await CrmAPI.updateTask(dealId, taskId, payload);
+        const updatedTask = response.data?.payload || response.data;
+        if (this.activeDealDetails && this.activeDealDetails.id === Number(dealId)) {
+          const currentTasks = this.activeDealDetails.tasks || [];
+          const taskIndex = currentTasks.findIndex(t => t.id === Number(taskId));
+          if (taskIndex !== -1) {
+            currentTasks[taskIndex] = updatedTask;
+            this.activeDealDetails.tasks = [...currentTasks];
+          }
+        }
+        this.fetchDealDetails(dealId).catch(() => {});
+        return updatedTask;
+      } finally {
+        this.setUIFlag({ updatingTask: false });
       }
     },
   }),

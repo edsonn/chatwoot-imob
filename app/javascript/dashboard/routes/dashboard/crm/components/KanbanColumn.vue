@@ -19,7 +19,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['edit-deal', 'move-deal', 'won-deal', 'lost-deal']);
+const emit = defineEmits(['edit-deal', 'move-deal', 'won-deal', 'lost-deal', 'select-deal']);
 
 const { t } = useI18n();
 
@@ -86,6 +86,7 @@ const stageColor = computed(() => {
           @move="d => emit('move-deal', d)"
           @won="d => emit('won-deal', d)"
           @lost="d => emit('lost-deal', d)"
+          @select="d => emit('select-deal', d)"
         />
       </template>
 

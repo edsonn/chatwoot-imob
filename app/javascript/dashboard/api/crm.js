@@ -34,6 +34,18 @@ class CrmAPI extends ApiClient {
     return axios.post(`${this.url}/deals/${id}/lost`, payload);
   }
 
+  getDeal(id) {
+    return axios.get(`${this.url}/deals/${id}`);
+  }
+
+  createTask(dealId, payload) {
+    return axios.post(`${this.url}/deals/${dealId}/tasks`, payload);
+  }
+
+  updateTask(dealId, taskId, payload) {
+    return axios.patch(`${this.url}/deals/${dealId}/tasks/${taskId}`, payload);
+  }
+
   getLossReasons() {
     return axios.get(`${this.url}/loss_reasons`);
   }
