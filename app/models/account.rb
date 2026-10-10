@@ -77,6 +77,10 @@ class Account < ApplicationRecord
   has_many :contacts, dependent: :destroy_async
   has_many :companies, dependent: :destroy_async
   has_many :conversations, dependent: :destroy_async
+  has_many :crm_pipelines, dependent: :destroy_async, class_name: 'Crm::Pipeline'
+  has_many :crm_pipeline_stages, dependent: :destroy_async, class_name: 'Crm::PipelineStage'
+  has_many :crm_deals, dependent: :destroy_async, class_name: 'Crm::Deal'
+  has_many :crm_loss_reasons, dependent: :destroy_async, class_name: 'Crm::LossReason'
   has_many :csat_survey_responses, dependent: :destroy_async
   has_many :custom_attribute_definitions, dependent: :destroy_async
   has_many :custom_filters, dependent: :destroy_async

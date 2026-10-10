@@ -100,6 +100,8 @@ class User < ApplicationRecord
   has_many :inboxes, through: :inbox_members, source: :inbox
   has_many :messages, as: :sender, dependent: :nullify
   has_many :invitees, through: :account_users, class_name: 'User', foreign_key: 'inviter_id', source: :inviter, dependent: :nullify
+  has_many :crm_assigned_deals, class_name: 'Crm::Deal', foreign_key: :assignee_id, dependent: :nullify
+  has_many :crm_deal_tasks, class_name: 'Crm::DealTask', foreign_key: :user_id, dependent: :restrict_with_error
 
   has_many :user_sessions, dependent: :destroy
   has_many :custom_filters, dependent: :destroy_async
