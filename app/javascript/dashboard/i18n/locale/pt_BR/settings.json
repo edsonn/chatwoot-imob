@@ -324,6 +324,7 @@
     "ACTIVE": "Ativo",
     "COMPANIES": "Empresas",
     "ALL_COMPANIES": "Todas as empresas",
+    "CRM_PIPELINES": "Funil de Vendas",
     "CAPTAIN": "Capitão",
     "CALLS": "Chamadas",
     "CAPTAIN_ASSISTANTS": "Assistentes",
@@ -1080,5 +1081,25 @@
       "CONFIRM_BUTTON_LABEL": "Excluir",
       "CANCEL_BUTTON_LABEL": "Cancelar"
     }
+  },
+  "CRM": {
+    "HEADER_TITLE": "Funil de Vendas",
+    "RELOAD": "Recarregar",
+    "PIPELINE_SELECT_LABEL": "Selecionar funil",
+    "EMPTY_STATE_TITLE": "Nenhum funil encontrado",
+    "EMPTY_STATE_SUBTITLE": "Você não possui funis de vendas configurados nesta conta.",
+    "EMPTY_STAGE_DEALS": "Nenhuma oportunidade nesta etapa",
+    "ERROR_TITLE": "Não foi possível carregar as oportunidades",
+    "ERROR_SUBTITLE": "Ocorreu uma falha ao buscar os dados do funil.",
+    "ERROR_UNAUTHORIZED": "Você não possui permissão para acessar este funil de vendas.",
+    "ERROR_NOT_FOUND": "O funil solicitado não foi encontrado.",
+    "ERROR_UNPROCESSABLE": "Não foi possível processar a consulta.",
+    "RETRY": "Tentar novamente",
+    "COMING_SOON": "Detalhes da oportunidade em breve",
+    "DEALS_COUNT": "{count} oportunidades",
+    "DEALS_COUNT_SINGLE": "1 oportunidade",
+    "TOTAL_STAGE_VALUE": "Total: {amount}",
+    "UNASSIGNED": "Sem responsável",
+    "NO_CONTACT": "Sem contato"
   }
 }

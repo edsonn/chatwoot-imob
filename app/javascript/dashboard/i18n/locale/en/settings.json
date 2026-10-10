@@ -329,6 +329,7 @@
     "ACTIVE": "Active",
     "COMPANIES": "Companies",
     "ALL_COMPANIES": "All Companies",
+    "CRM_PIPELINES": "Sales Pipeline",
     "CAPTAIN": "Captain",
     "CALLS": "Calls",
     "CAPTAIN_ASSISTANTS": "Assistants",
@@ -1117,5 +1118,25 @@
       "CONFIRM_BUTTON_LABEL": "Delete",
       "CANCEL_BUTTON_LABEL": "Cancel"
     }
+  },
+  "CRM": {
+    "HEADER_TITLE": "Sales Pipeline",
+    "RELOAD": "Reload",
+    "PIPELINE_SELECT_LABEL": "Select pipeline",
+    "EMPTY_STATE_TITLE": "No pipelines found",
+    "EMPTY_STATE_SUBTITLE": "You don't have any sales pipelines configured in this account.",
+    "EMPTY_STAGE_DEALS": "No deals in this stage",
+    "ERROR_TITLE": "Unable to load deals",
+    "ERROR_SUBTITLE": "There was an issue fetching the pipeline data.",
+    "ERROR_UNAUTHORIZED": "You do not have permission to view this pipeline.",
+    "ERROR_NOT_FOUND": "The requested pipeline was not found.",
+    "ERROR_UNPROCESSABLE": "The request could not be processed.",
+    "RETRY": "Try again",
+    "COMING_SOON": "Deal details coming soon",
+    "DEALS_COUNT": "{count} deals",
+    "DEALS_COUNT_SINGLE": "1 deal",
+    "TOTAL_STAGE_VALUE": "Total: {amount}",
+    "UNASSIGNED": "Unassigned",
+    "NO_CONTACT": "No contact"
   }
 }

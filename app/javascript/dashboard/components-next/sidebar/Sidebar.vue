@@ -66,9 +66,18 @@ const isMobile = computed(() => windowWidth.value < 768);
 
 const accountId = useMapGetter('getCurrentAccountId');
 const currentUserId = useMapGetter('getCurrentUserID');
+const currentRole = useMapGetter('getCurrentRole');
+const currentAccount = useMapGetter('getCurrentAccount');
 const isFeatureEnabledonAccount = useMapGetter(
   'accounts/isFeatureEnabledonAccount'
 );
+
+const isCrmAvailable = computed(() => {
+  const role = currentRole.value;
+  const isAllowedRole = role === 'administrator' || role === 'agent';
+  const isAccountActive = currentAccount.value?.status === 'active';
+  return isAllowedRole && isAccountActive;
+});
 
 const isMonitorsAvailable = computed(
   () =>
@@ -685,6 +694,17 @@ const menuItems = computed(() => {
         },
       ],
     },
+    ...(isCrmAvailable.value
+      ? [
+          {
+            name: 'CRM',
+            label: t('SIDEBAR.CRM_PIPELINES'),
+            icon: 'i-lucide-kanban',
+            to: accountScopedRoute('crm_pipelines_index'),
+            activeOn: ['crm_pipelines_index'],
+          },
+        ]
+      : []),
     {
       name: 'Reports',
       label: t('SIDEBAR.REPORTS'),
