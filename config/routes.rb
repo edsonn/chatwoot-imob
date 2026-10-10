@@ -426,6 +426,23 @@ Rails.application.routes.draw do
           end
 
           resources :webhooks, only: [:index, :create, :update, :destroy]
+
+          namespace :crm do
+            resources :pipelines, only: [:index] do
+              get :deals, on: :member
+            end
+            resources :deals, only: [:show, :create, :update] do
+              member do
+                post :move
+                post :won
+                post :lost
+                post :tasks, to: 'tasks#create'
+                patch 'tasks/:task_id', to: 'tasks#update'
+                put 'tasks/:task_id', to: 'tasks#update'
+              end
+            end
+            resources :loss_reasons, only: [:index]
+          end
           namespace :integrations do
             resource :stripe, controller: 'stripe', only: [:show, :destroy] do
               post :auth
