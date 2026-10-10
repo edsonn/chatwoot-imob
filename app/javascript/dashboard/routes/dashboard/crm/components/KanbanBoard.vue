@@ -15,6 +15,8 @@ defineProps({
     required: true,
   },
 });
+
+const emit = defineEmits(['edit-deal', 'move-deal', 'won-deal', 'lost-deal']);
 </script>
 
 <template>
@@ -26,6 +28,10 @@ defineProps({
         :stage="stage"
         :deals="dealsByStage[stage.id] || []"
         :metrics="stageMetrics[stage.id] || { count: 0, totalValue: 0, currency: 'BRL' }"
+        @edit-deal="d => emit('edit-deal', d)"
+        @move-deal="d => emit('move-deal', d)"
+        @won-deal="d => emit('won-deal', d)"
+        @lost-deal="d => emit('lost-deal', d)"
       />
     </div>
   </div>

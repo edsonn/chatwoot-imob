@@ -2,14 +2,25 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useCrmStore } from 'dashboard/stores/crm';
+import { useAlert } from 'dashboard/composables';
+import { parseAPIErrorResponse } from 'dashboard/store/utils/api';
 import Button from 'dashboard/components-next/button/Button.vue';
 import Select from 'dashboard/components-next/select/Select.vue';
 import EmptyStateLayout from 'dashboard/components-next/EmptyStateLayout.vue';
 import KanbanBoard from '../components/KanbanBoard.vue';
 import KanbanSkeleton from '../components/KanbanSkeleton.vue';
+import DealFormDialog from '../components/DealFormDialog.vue';
+import MoveDealDialog from '../components/MoveDealDialog.vue';
+import WonDealDialog from '../components/WonDealDialog.vue';
+import LostDealDialog from '../components/LostDealDialog.vue';
 
 const { t } = useI18n();
 const crmStore = useCrmStore();
+
+const dealFormDialogRef = ref(null);
+const moveDealDialogRef = ref(null);
+const wonDealDialogRef = ref(null);
+const lostDealDialogRef = ref(null);
 
 const pipelines = computed(() => crmStore.getPipelines);
 const activePipeline = computed(() => crmStore.getActivePipeline);
@@ -22,6 +33,10 @@ const isFetchingPipelines = computed(() => uiFlags.value.fetchingPipelines);
 const isFetchingDeals = computed(() => uiFlags.value.fetchingDeals);
 const isFetching = computed(
   () => isFetchingPipelines.value || isFetchingDeals.value
+);
+
+const isCreatingOrUpdating = computed(
+  () => uiFlags.value.creatingDeal || uiFlags.value.updatingDeal
 );
 
 const hasError = computed(() => Boolean(uiFlags.value.error));
@@ -74,6 +89,85 @@ const handleRetry = () => {
   handleReload();
 };
 
+const handleOpenCreateDeal = () => {
+  dealFormDialogRef.value?.openCreate();
+};
+
+const handleOpenEditDeal = deal => {
+  dealFormDialogRef.value?.openEdit(deal);
+};
+
+const handleOpenMoveDeal = deal => {
+  moveDealDialogRef.value?.open(deal);
+};
+
+const handleOpenWonDeal = deal => {
+  wonDealDialogRef.value?.open(deal);
+};
+
+const handleOpenLostDeal = deal => {
+  lostDealDialogRef.value?.open(deal);
+};
+
+const handleCreateDeal = async payload => {
+  try {
+    await crmStore.createDeal(payload);
+    useAlert(t('CRM.DEALS.CREATE_SUCCESS'));
+    dealFormDialogRef.value?.onSuccess();
+  } catch (error) {
+    useAlert(parseAPIErrorResponse(error) || t('CRM.DEALS.ERROR_GENERIC'));
+  }
+};
+
+const handleUpdateDeal = async ({ id, data }) => {
+  try {
+    await crmStore.updateDeal(id, data);
+    useAlert(t('CRM.DEALS.UPDATE_SUCCESS'));
+    dealFormDialogRef.value?.onSuccess();
+  } catch (error) {
+    useAlert(parseAPIErrorResponse(error) || t('CRM.DEALS.ERROR_GENERIC'));
+  }
+};
+
+const handleConfirmMove = async ({ dealId, crm_pipeline_stage_id }) => {
+  try {
+    await crmStore.moveDeal(dealId, { crm_pipeline_stage_id });
+    useAlert(t('CRM.DEALS.MOVE_SUCCESS'));
+    moveDealDialogRef.value?.onSuccess();
+  } catch (error) {
+    useAlert(parseAPIErrorResponse(error) || t('CRM.DEALS.ERROR_GENERIC'));
+  }
+};
+
+const handleConfirmWon = async ({ dealId, final_value, closed_at }) => {
+  try {
+    await crmStore.wonDeal(dealId, { final_value, closed_at });
+    useAlert(t('CRM.DEALS.WON_SUCCESS'));
+    wonDealDialogRef.value?.onSuccess();
+  } catch (error) {
+    useAlert(parseAPIErrorResponse(error) || t('CRM.DEALS.ERROR_GENERIC'));
+  }
+};
+
+const handleConfirmLost = async ({
+  dealId,
+  crm_loss_reason_id,
+  loss_notes,
+  closed_at,
+}) => {
+  try {
+    await crmStore.lostDeal(dealId, {
+      crm_loss_reason_id,
+      loss_notes,
+      closed_at,
+    });
+    useAlert(t('CRM.DEALS.LOST_SUCCESS'));
+    lostDealDialogRef.value?.onSuccess();
+  } catch (error) {
+    useAlert(parseAPIErrorResponse(error) || t('CRM.DEALS.ERROR_GENERIC'));
+  }
+};
+
 onMounted(() => {
   crmStore.fetchPipelines();
 });
@@ -117,6 +211,17 @@ onMounted(() => {
           :is-loading="isFetching"
           :title="t('CRM.RELOAD')"
           @click="handleReload"
+        />
+
+        <!-- Create Deal Button -->
+        <Button
+          v-if="activePipeline"
+          variant="solid"
+          color="blue"
+          size="sm"
+          icon="i-lucide-plus"
+          :label="t('CRM.DEALS.NEW_DEAL')"
+          @click="handleOpenCreateDeal"
         />
       </div>
     </header>
@@ -169,8 +274,38 @@ onMounted(() => {
           :stages="stages"
           :deals-by-stage="dealsByStage"
           :stage-metrics="stageMetrics"
+          @edit-deal="handleOpenEditDeal"
+          @move-deal="handleOpenMoveDeal"
+          @won-deal="handleOpenWonDeal"
+          @lost-deal="handleOpenLostDeal"
         />
       </template>
     </main>
+
+    <!-- Modals -->
+    <DealFormDialog
+      ref="dealFormDialogRef"
+      :is-loading="isCreatingOrUpdating"
+      @create="handleCreateDeal"
+      @update="handleUpdateDeal"
+    />
+
+    <MoveDealDialog
+      ref="moveDealDialogRef"
+      :is-loading="uiFlags.movingDeal"
+      @confirm="handleConfirmMove"
+    />
+
+    <WonDealDialog
+      ref="wonDealDialogRef"
+      :is-loading="uiFlags.winningDeal"
+      @confirm="handleConfirmWon"
+    />
+
+    <LostDealDialog
+      ref="lostDealDialogRef"
+      :is-loading="uiFlags.losingDeal"
+      @confirm="handleConfirmLost"
+    />
   </div>
 </template>

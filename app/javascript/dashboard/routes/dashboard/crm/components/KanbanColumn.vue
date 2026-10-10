@@ -19,6 +19,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['edit-deal', 'move-deal', 'won-deal', 'lost-deal']);
+
 const { t } = useI18n();
 
 const formattedTotalValue = computed(() => {
@@ -80,6 +82,10 @@ const stageColor = computed(() => {
           v-for="deal in deals"
           :key="deal.id"
           :deal="deal"
+          @edit="d => emit('edit-deal', d)"
+          @move="d => emit('move-deal', d)"
+          @won="d => emit('won-deal', d)"
+          @lost="d => emit('lost-deal', d)"
         />
       </template>
 
